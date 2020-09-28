@@ -11,8 +11,10 @@ using Microsoft.Owin.Security.OAuth;
 using Owin;
 using Microsoft.AspNet.Identity;
 using OAuthSpplication.Providers;
+using OAuthSpplication.Models;
+using OAuthSpplication.App_Start;
 
-namespace OAuthSpplication.App_Start
+namespace OAuthSpplication
 {
 	public partial class Startup
 	{
@@ -21,7 +23,18 @@ namespace OAuthSpplication.App_Start
 
 		public void ConfigureAuth(IAppBuilder app)
         {
+            app.CreatePerOwinContext(ApplicationDbContext.Create);
+            app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
+
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
+            //app.UseCookieAuthentication(new CookieAuthenticationOptions
+            //{
+            //    AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
+            //    LoginPath = new PathString("/Account/Login"),
+            //    LogoutPath = new PathString("/Account/LogOff"),
+            //    ExpireTimeSpan = TimeSpan.FromMinutes(5.0),
+            //});
+
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
             PublicClientId = "self";
@@ -29,15 +42,17 @@ namespace OAuthSpplication.App_Start
             {
                 TokenEndpointPath = new PathString("/Token"),
                 Provider = new ApplicationOAuthProvider(PublicClientId),
-                AuthorizeEndpointPath = new PathString("/Account/ExternalLogin"),
+                AuthorizeEndpointPath = new PathString("/api/Account/ExternalLogin"),
                 AccessTokenExpireTimeSpan = TimeSpan.FromHours(4),
                 AllowInsecureHttp = true
             };
 
-            app.UseOAuthBearerTokens(OAuthAuthorizationServerOptions);
-            app.UseTwoFactorSignInCookie(DefaultAuthenticationTypes.TwoFactorCookie, TimeSpan.FromMinutes(5));
-            app.UseTwoFactorRememberBrowserCookie(DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
+            //app.UseOAuthBearerTokens(OAuthAuthorizationServerOptions);
+            //app.UseTwoFactorSignInCookie(DefaultAuthenticationTypes.TwoFactorCookie, TimeSpan.FromMinutes(5));
+            //app.UseTwoFactorRememberBrowserCookie(DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
 
+            app.UseOAuthAuthorizationServer(OAuthAuthorizationServerOptions);
+            app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
 
             app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
             {
