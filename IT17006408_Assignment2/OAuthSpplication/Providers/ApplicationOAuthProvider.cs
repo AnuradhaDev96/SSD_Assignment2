@@ -73,7 +73,7 @@ namespace OAuthSpplication.Providers
             return Task.FromResult<object>(null);
         }
 
-        public override async Task ValidateClientRedirectUri(OAuthValidateClientRedirectUriContext context)
+        public override Task ValidateClientRedirectUri(OAuthValidateClientRedirectUriContext context)
         {
             if (context.ClientId == _publicClientId)
             {
@@ -84,6 +84,8 @@ namespace OAuthSpplication.Providers
                     context.Validated();
                 }
             }
+
+            return Task.FromResult<object>(null);
         }
 
         public static AuthenticationProperties CreateProperties(string userName)
